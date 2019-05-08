@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
@@ -113,7 +112,8 @@ public class JsonPullParser {
 	 */
 	public static final Charset DEFAULT_CHARSET = Charset.forName(DEFAULT_CHARSET_NAME);
 
-	BufferedReader br;
+//	BufferedReader br;
+	SimpleStringReader br;
 
 	final Stack<State> stack = new Stack<State>();
 
@@ -228,7 +228,9 @@ public class JsonPullParser {
 			throw new IllegalArgumentException("'json' must not be null.");
 		}
 
-		return newParser(new StringReader(json));
+		JsonPullParser parser = new JsonPullParser();
+		parser.br = new SimpleStringReader(json);
+		return parser;
 	}
 
 	/**
@@ -249,31 +251,16 @@ public class JsonPullParser {
 			throw new IllegalArgumentException("'reader' must not be null.");
 		}
 
+		JsonPullParser parser = new JsonPullParser();
 		BufferedReader br =
 				(reader instanceof BufferedReader) ? (BufferedReader) reader : new BufferedReader(
 						reader);
-		JsonPullParser parser = new JsonPullParser();
-		parser.setSource(br);
+		parser.br = new SimpleStringReader(br);
 		return parser;
 	}
 
 	JsonPullParser() {
 		stack.push(State.ORIGIN);
-	}
-
-	/**
-	 * Sets an Reader as the {@code JSON} feed.
-	 * @param reader
-	 *            A Reader. Cannot be null.
-	 */
-	void setSource(Reader reader) {
-		if (reader == null) {
-			throw new IllegalArgumentException("'reader' must not be null.");
-		}
-
-		br =
-				(reader instanceof BufferedReader) ? (BufferedReader) reader : new BufferedReader(
-						reader);
 	}
 
 	/**
